@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>插入排序法學習工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .array-element.current {
+            background-color: #FF9800;
+        }
+        .array-element.comparing {
+            background-color: #F44336;
+        }
+        .array-element.sorted {
+            background-color: #8BC34A;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .steps {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-left: 5px solid #4CAF50;
+        }
+        .complexity {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>插入排序法學習工具</h1>
+        
+        <div class="input-group">
+            <label for="array-input">輸入要排序的數字（用逗號分隔）：</label>
+            <input type="text" id="array-input" placeholder="例如: 5,3,8,4,2">
+            <button onclick="initializeArray()">初始化陣列</button>
+        </div>
+        
+        <div class="array-container" id="array-container"></div>
+        
+        <div class="controls">
+            <button id="start-btn" onclick="startSort()" disabled>開始排序</button>
+            <button id="step-btn" onclick="stepSort()" disabled>下一步</button>
+            <button id="reset-btn" onclick="reset()">重置</button>
+        </div>
+        
+        <div class="steps">
+            <h3>操作過程步驟：</h3>
+            <div id="steps-content">
+                <p>1. 從第二個元素開始，將其視為要插入的元素。</p>
+                <p>2. 比較該元素與已排序區域中的元素。</p>
+                <p>3. 找到正確的位置並將元素插入。</p>
+                <p>4. 向右移動比要插入元素更大的元素。</p>
+                <p>5. 重複上述步驟，直到整個陣列被排序。</p>
+            </div>
+        </div>
+        
+        <div class="complexity">
+            <h3>操作複雜度：</h3>
+            <p><strong>時間複雜度：</strong>O(n²) - 平均和最壞情況下為O(n²)，最好情況下為O(n)（已排序）。</p>
+            <p><strong>空間複雜度：</strong>O(1) - 只使用固定的額外空間。</p>
+            <p><strong>穩定性：</strong>穩定排序 - 相等元素的相對順序不會改變。</p>
+        </div>
+        
+        <div id="current-step">
+            <h3>當前步驟：</h3>
+            <p id="step-info">請先初始化陣列</p>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← 返回主頁</a>
+        </div>
+    </div>
+
+    <script>
+        let array = [];
+        let originalArray = [];
+        let i = 1;
+        let j = 0;
+        let isSorting = false;
+        let stepCount = 0;
+        let phase = 'picking'; // 'picking' or 'inserting'
+        let key = 0;
+
+        function initializeArray() {
+            const input = document.getElementById('array-input').value;
+            const numbers = input.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+            
+            if (numbers.length === 0) {
+                alert('請輸入有效的數字');
+                return;
+            }
+            
+            array = [...numbers];
+            originalArray = [...numbers];
+            i = 1;
+            j = 0;
+            stepCount = 0;
+            isSorting = false;
+            phase = 'picking';
+            key = 0;
+            
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '陣列已初始化，點擊"開始排序"開始';
+        }
+
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            
+            array.forEach((num, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = num;
+                element.id = `element-${index}`;
+                container.appendChild(element);
+            });
+        }
+
+        function updateButtons() {
+            const startBtn = document.getElementById('start-btn');
+            const stepBtn = document.getElementById('step-btn');
+            
+            if (array.length > 0 && !isSorting) {
+                startBtn.disabled = false;
+                stepBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+                stepBtn.disabled = true;
+            }
+        }
+
+        function highlightElements() {
+            // 清除之前的highlight
+            document.querySelectorAll('.array-element').forEach(el => {
+                el.classList.remove('current', 'comparing', 'sorted');
+            });
+            
+            // 已排序的元素
+            for (let k = 0; k < i; k++) {
+                document.getElementById(`element-${k}`).classList.add('sorted');
+            }
+            
+            // 當前要插入的元素
+            if (phase === 'picking' && i < array.length) {
+                document.getElementById(`element-${i}`).classList.add('current');
+            }
+            
+            // 比較的元素
+            if (phase === 'inserting' && j >= 0) {
+                document.getElementById(`element-${j}`).classList.add('comparing');
+            }
+        }
+
+        function stepSort() {
+            if (array.length === 0) return;
+            
+            if (i >= array.length) {
+                // 排序完成
+                document.getElementById('step-info').textContent = `排序完成！總共 ${stepCount} 步`;
+                isSorting = false;
+                updateButtons();
+                highlightElements();
+                return;
+            }
+            
+            if (phase === 'picking') {
+                key = array[i];
+                j = i - 1;
+                highlightElements();
+                document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 選擇元素 ${key} 在位置 ${i}，準備插入到已排序區域 [0, ${i - 1}]`;
+                phase = 'inserting';
+                setTimeout(stepSort, 1000);
+                return;
+            } else if (phase === 'inserting') {
+                if (j >= 0 && array[j] > key) {
+                    // 向右移動
+                    array[j + 1] = array[j];
+                    highlightElements();
+                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: ${array[j]} > ${key}，將 ${array[j]} 向右移動到位置 ${j + 1}`;
+                    j--;
+                    setTimeout(() => {
+                        renderArray();
+                        setTimeout(stepSort, 500);
+                    }, 500);
+                } else {
+                    // 插入
+                    array[j + 1] = key;
+                    renderArray();
+                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 將元素 ${key} 插入到位置 ${j + 1}`;
+                    i++;
+                    phase = 'picking';
+                    setTimeout(stepSort, 1000);
+                }
+            }
+        }
+
+        function startSort() {
+            if (isSorting) return;
+            isSorting = true;
+            stepCount = 0;
+            i = 1;
+            j = 0;
+            phase = 'picking';
+            document.getElementById('step-info').textContent = '開始排序...';
+            stepSort();
+        }
+
+        function reset() {
+            array = [...originalArray];
+            i = 1;
+            j = 0;
+            stepCount = 0;
+            isSorting = false;
+            phase = 'picking';
+            key = 0;
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '已重置，請重新初始化或開始排序';
+        }
+
+        // 初始化時更新按鈕狀態
+        updateButtons();
+    </script>
+</body>
+</html>

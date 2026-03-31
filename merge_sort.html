@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合併排序法學習工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .array-element.dividing {
+            background-color: #FF9800;
+        }
+        .array-element.merging {
+            background-color: #F44336;
+        }
+        .array-element.sorted {
+            background-color: #8BC34A;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .steps {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-left: 5px solid #4CAF50;
+        }
+        .complexity {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>合併排序法學習工具</h1>
+        
+        <div class="input-group">
+            <label for="array-input">輸入要排序的數字（用逗號分隔）：</label>
+            <input type="text" id="array-input" placeholder="例如: 5,3,8,4,2">
+            <button onclick="initializeArray()">初始化陣列</button>
+        </div>
+        
+        <div class="array-container" id="array-container"></div>
+        
+        <div class="controls">
+            <button id="start-btn" onclick="startSort()" disabled>開始排序</button>
+            <button id="step-btn" onclick="stepSort()" disabled>下一步</button>
+            <button id="reset-btn" onclick="reset()">重置</button>
+        </div>
+        
+        <div class="steps">
+            <h3>操作過程步驟：</h3>
+            <div id="steps-content">
+                <p>1. 分割：將陣列遞迴地分割，直到每個子陣列只有一個元素。</p>
+                <p>2. 合併：比較相鄰的子陣列。</p>
+                <p>3. 將較小的元素合併到新陣列中。</p>
+                <p>4. 重複合併過程，直到整個陣列被排序。</p>
+                <p>5. 合併排序採用分治策略，效率高於氣泡和選擇排序。</p>
+            </div>
+        </div>
+        
+        <div class="complexity">
+            <h3>操作複雜度：</h3>
+            <p><strong>時間複雜度：</strong>O(n log n) - 在所有情況下（最好、平均、最壞）都是O(n log n)。</p>
+            <p><strong>空間複雜度：</strong>O(n) - 需要額外空間來存儲臨時陣列。</p>
+            <p><strong>穩定性：</strong>穩定排序 - 相等元素的相對順序不會改變。</p>
+        </div>
+        
+        <div id="current-step">
+            <h3>當前步驟：</h3>
+            <p id="step-info">請先初始化陣列</p>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← 返回主頁</a>
+        </div>
+    </div>
+
+    <script>
+        let array = [];
+        let originalArray = [];
+        let isSorting = false;
+        let stepCount = 0;
+        let divisions = [];
+        let currentDivisionIndex = 0;
+
+        function initializeArray() {
+            const input = document.getElementById('array-input').value;
+            const numbers = input.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+            
+            if (numbers.length === 0) {
+                alert('請輸入有效的數字');
+                return;
+            }
+            
+            array = [...numbers];
+            originalArray = [...numbers];
+            stepCount = 0;
+            isSorting = false;
+            divisions = [];
+            currentDivisionIndex = 0;
+            
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '陣列已初始化，點擊"開始排序"開始';
+        }
+
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            
+            array.forEach((num, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = num;
+                element.id = `element-${index}`;
+                container.appendChild(element);
+            });
+        }
+
+        function updateButtons() {
+            const startBtn = document.getElementById('start-btn');
+            const stepBtn = document.getElementById('step-btn');
+            
+            if (array.length > 0 && !isSorting) {
+                startBtn.disabled = false;
+                stepBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+                stepBtn.disabled = true;
+            }
+        }
+
+        function highlightRange(indices, className) {
+            document.querySelectorAll('.array-element').forEach(el => {
+                el.classList.remove('dividing', 'merging', 'sorted');
+            });
+            
+            indices.forEach(idx => {
+                if (idx >= 0 && idx < array.length) {
+                    document.getElementById(`element-${idx}`).classList.add(className);
+                }
+            });
+        }
+
+        function* mergeSort(arr, left, right, depth) {
+            if (left < right) {
+                const mid = Math.floor((left + right) / 2);
+                
+                // 分割左側
+                yield* mergeSort(arr, left, mid, depth + 1);
+                
+                // 分割右側
+                yield* mergeSort(arr, mid + 1, right, depth + 1);
+                
+                // 合併
+                yield* merge(arr, left, mid, right);
+            }
+        }
+
+        function* merge(arr, left, mid, right) {
+            const leftArr = arr.slice(left, mid + 1);
+            const rightArr = arr.slice(mid + 1, right + 1);
+            let i = 0, j = 0, k = left;
+            
+            while (i < leftArr.length && j < rightArr.length) {
+                yield {
+                    type: 'comparing',
+                    indices: [left + i, mid + 1 + j],
+                    message: `比較 ${leftArr[i]} 和 ${rightArr[j]}`
+                };
+                
+                if (leftArr[i] <= rightArr[j]) {
+                    arr[k++] = leftArr[i++];
+                } else {
+                    arr[k++] = rightArr[j++];
+                }
+                
+                yield {
+                    type: 'merged',
+                    indices: Array.from({length: right - left + 1}, (_, idx) => left + idx),
+                    message: `合併進度：位置 ${left} 到 ${k - 1}`
+                };
+            }
+            
+            while (i < leftArr.length) {
+                arr[k++] = leftArr[i++];
+                yield {
+                    type: 'merged',
+                    indices: Array.from({length: right - left + 1}, (_, idx) => left + idx),
+                    message: `合併進度：位置 ${left} 到 ${k - 1}`
+                };
+            }
+            
+            while (j < rightArr.length) {
+                arr[k++] = rightArr[j++];
+                yield {
+                    type: 'merged',
+                    indices: Array.from({length: right - left + 1}, (_, idx) => left + idx),
+                    message: `合併進度：位置 ${left} 到 ${k - 1}`
+                };
+            }
+        }
+
+        let sortGenerator = null;
+
+        function stepSort() {
+            if (array.length === 0) return;
+            
+            if (sortGenerator === null) {
+                sortGenerator = mergeSort(array, 0, array.length - 1, 0);
+            }
+            
+            const result = sortGenerator.next();
+            
+            if (result.done) {
+                document.getElementById('step-info').textContent = `排序完成！總共 ${stepCount} 步`;
+                isSorting = false;
+                updateButtons();
+                renderArray();
+                highlightRange(Array.from({length: array.length}, (_, i) => i), 'sorted');
+                sortGenerator = null;
+                return;
+            }
+            
+            const step = result.value;
+            if (step) {
+                stepCount++;
+                if (step.type === 'comparing') {
+                    highlightRange(step.indices, 'merging');
+                    document.getElementById('step-info').textContent = `步驟 ${stepCount}: ${step.message}`;
+                } else {
+                    renderArray();
+                    highlightRange(step.indices, 'sorted');
+                    document.getElementById('step-info').textContent = `步驟 ${stepCount}: ${step.message}`;
+                }
+                
+                setTimeout(stepSort, 800);
+            } else {
+                setTimeout(stepSort, 800);
+            }
+        }
+
+        function startSort() {
+            if (isSorting) return;
+            isSorting = true;
+            stepCount = 0;
+            sortGenerator = mergeSort(array, 0, array.length - 1, 0);
+            document.getElementById('step-info').textContent = '開始排序...';
+            stepSort();
+        }
+
+        function reset() {
+            array = [...originalArray];
+            stepCount = 0;
+            isSorting = false;
+            sortGenerator = null;
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '已重置，請重新初始化或開始排序';
+        }
+
+        // 初始化時更新按鈕狀態
+        updateButtons();
+    </script>
+</body>
+</html>

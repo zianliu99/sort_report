@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇排序法學習工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .array-element.searching {
+            background-color: #FF9800;
+        }
+        .array-element.selected {
+            background-color: #F44336;
+        }
+        .array-element.sorted {
+            background-color: #8BC34A;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .steps {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-left: 5px solid #4CAF50;
+        }
+        .complexity {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>選擇排序法學習工具</h1>
+        
+        <div class="input-group">
+            <label for="array-input">輸入要排序的數字（用逗號分隔）：</label>
+            <input type="text" id="array-input" placeholder="例如: 5,3,8,4,2">
+            <button onclick="initializeArray()">初始化陣列</button>
+        </div>
+        
+        <div class="array-container" id="array-container"></div>
+        
+        <div class="controls">
+            <button id="start-btn" onclick="startSort()" disabled>開始排序</button>
+            <button id="step-btn" onclick="stepSort()" disabled>下一步</button>
+            <button id="reset-btn" onclick="reset()">重置</button>
+        </div>
+        
+        <div class="steps">
+            <h3>操作過程步驟：</h3>
+            <div id="steps-content">
+                <p>1. 從陣列中找到最小的元素。</p>
+                <p>2. 將最小元素與陣列的第一個位置交換。</p>
+                <p>3. 在剩餘的未排序元素中重複步驟1和2。</p>
+                <p>4. 每次循環後，已排序區域會擴展一個元素。</p>
+                <p>5. 直到整個陣列被排序。</p>
+            </div>
+        </div>
+        
+        <div class="complexity">
+            <h3>操作複雜度：</h3>
+            <p><strong>時間複雜度：</strong>O(n²) - 每個位置都需要查找最小值，在最壞、平均和最好情況下都是O(n²)。</p>
+            <p><strong>空間複雜度：</strong>O(1) - 只使用固定的額外空間。</p>
+            <p><strong>穩定性：</strong>不穩定排序 - 相等元素的相對順序可能會改變。</p>
+        </div>
+        
+        <div id="current-step">
+            <h3>當前步驟：</h3>
+            <p id="step-info">請先初始化陣列</p>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← 返回主頁</a>
+        </div>
+    </div>
+
+    <script>
+        let array = [];
+        let originalArray = [];
+        let i = 0;
+        let j = 0;
+        let minIndex = 0;
+        let isSorting = false;
+        let stepCount = 0;
+        let phase = 'searching'; // 'searching' or 'swapping'
+
+        function initializeArray() {
+            const input = document.getElementById('array-input').value;
+            const numbers = input.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+            
+            if (numbers.length === 0) {
+                alert('請輸入有效的數字');
+                return;
+            }
+            
+            array = [...numbers];
+            originalArray = [...numbers];
+            i = 0;
+            j = 0;
+            minIndex = 0;
+            stepCount = 0;
+            isSorting = false;
+            phase = 'searching';
+            
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '陣列已初始化，點擊"開始排序"開始';
+        }
+
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            
+            array.forEach((num, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = num;
+                element.id = `element-${index}`;
+                container.appendChild(element);
+            });
+        }
+
+        function updateButtons() {
+            const startBtn = document.getElementById('start-btn');
+            const stepBtn = document.getElementById('step-btn');
+            
+            if (array.length > 0 && !isSorting) {
+                startBtn.disabled = false;
+                stepBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+                stepBtn.disabled = true;
+            }
+        }
+
+        function highlightElements() {
+            // 清除之前的highlight
+            document.querySelectorAll('.array-element').forEach(el => {
+                el.classList.remove('searching', 'selected', 'sorted');
+            });
+            
+            // 已排序的元素
+            for (let k = 0; k < i; k++) {
+                document.getElementById(`element-${k}`).classList.add('sorted');
+            }
+            
+            // 當前搜索中的元素
+            for (let k = i; k <= j; k++) {
+                if (k < array.length) {
+                    document.getElementById(`element-${k}`).classList.add('searching');
+                }
+            }
+            
+            // 最小值元素
+            if (minIndex >= i && minIndex < array.length) {
+                document.getElementById(`element-${minIndex}`).classList.add('selected');
+            }
+        }
+
+        function stepSort() {
+            if (array.length === 0) return;
+            
+            if (i >= array.length - 1) {
+                // 排序完成
+                document.getElementById('step-info').textContent = `排序完成！總共 ${stepCount} 步`;
+                isSorting = false;
+                updateButtons();
+                highlightElements();
+                return;
+            }
+            
+            if (phase === 'searching') {
+                if (j < array.length) {
+                    minIndex = i;
+                    
+                    // 找最小值
+                    for (let k = i + 1; k < array.length; k++) {
+                        if (array[k] < array[minIndex]) {
+                            minIndex = k;
+                        }
+                    }
+                    
+                    highlightElements();
+                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 在未排序區域 [${i}, ${array.length - 1}] 中找到最小值 ${array[minIndex]} 在位置 ${minIndex}`;
+                    phase = 'swapping';
+                    setTimeout(stepSort, 1000);
+                    return;
+                }
+            } else if (phase === 'swapping') {
+                // 交換
+                if (minIndex !== i) {
+                    [array[i], array[minIndex]] = [array[minIndex], array[i]];
+                    highlightElements();
+                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 交換位置 ${i} 和 ${minIndex} 的元素`;
+                    setTimeout(() => {
+                        renderArray();
+                        i++;
+                        phase = 'searching';
+                        setTimeout(stepSort, 500);
+                    }, 500);
+                } else {
+                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 最小值已在正確位置`;
+                    i++;
+                    phase = 'searching';
+                    setTimeout(stepSort, 500);
+                }
+            }
+        }
+
+        function startSort() {
+            if (isSorting) return;
+            isSorting = true;
+            stepCount = 0;
+            i = 0;
+            j = 0;
+            phase = 'searching';
+            document.getElementById('step-info').textContent = '開始排序...';
+            stepSort();
+        }
+
+        function reset() {
+            array = [...originalArray];
+            i = 0;
+            j = 0;
+            minIndex = 0;
+            stepCount = 0;
+            isSorting = false;
+            phase = 'searching';
+            renderArray();
+            updateButtons();
+            document.getElementById('step-info').textContent = '已重置，請重新初始化或開始排序';
+        }
+
+        // 初始化時更新按鈕狀態
+        updateButtons();
+    </script>
+</body>
+</html>
