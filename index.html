@@ -5,138 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>排序算法學習工具</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 {
-            color: #333;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 0;
+        }
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 5px;
         }
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #666;
+            font-size: 1.05em;
+            line-height: 1.8;
         }
         .nav-links {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
             margin: 30px 0;
         }
         .nav-card {
-            border: 2px solid #2196F3;
-            border-radius: 8px;
-            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            padding: 30px 20px;
             text-align: center;
-            transition: all 0.3s ease;
-            background-color: #f9f9f9;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        .nav-card:nth-child(2)::before {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+        .nav-card:nth-child(3)::before {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+        }
+        .nav-card:nth-child(4)::before {
+            background: linear-gradient(90deg, #fa709a, #fee140);
         }
         .nav-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
-            background-color: #e3f2fd;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
         .nav-card a {
-            color: #2196F3;
+            color: #333;
             text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 22px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        .nav-card:hover a {
+            color: #667eea;
+        }
+        .nav-card .complexity {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .nav-card .description {
+            color: #777;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .emoji {
+            font-size: 2.5em;
+            margin-bottom: 10px;
             display: block;
         }
-        .nav-card p {
-            margin: 10px 0 0 0;
-            color: #666;
-            font-size: 14px;
-        }
-        .array-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .array-element {
-            width: 40px;
-            height: 40px;
-            margin: 0 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        .array-element.comparing {
-            background-color: #FF9800;
-        }
-        .array-element.swapping {
-            background-color: #F44336;
-        }
-        .controls {
+        .footer {
             text-align: center;
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0b7dda;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .steps {
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #e8f5e8;
-            border-left: 5px solid #4CAF50;
-        }
-        .complexity {
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
-        }
-        .input-group {
-            margin: 20px 0;
-            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #999;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>📊 排序算法學習工具</h1>
+        <p>互動式學習平台 - 視覺化算法執行過程</p>
+    </div>
     <div class="container">
-        <h1>排序算法學習工具</h1>
-        <p style="text-align: center; color: #666; margin-bottom: 30px;">選擇下面的排序方法開始學習</p>
+        <div class="intro">
+            <p>歡迎來到排序算法學習工具！這裡提供了四種常用排序算法的互動式學習工具。</p>
+            <p>通過逐步演示和可視化，幫助你深入理解每個排序算法的工作原理。</p>
+            <p>選擇下面的排序方法開始學習吧！</p>
+        </div>
         
         <div class="nav-links">
             <div class="nav-card">
+                <span class="emoji">🫧</span>
                 <a href="bubble_sort.html">氣泡排序法</a>
-                <p>時間複雜度: O(n²)</p>
+                <div class="complexity">⏱️ O(n²)</div>
+                <div class="description">通過反覆交換相鄰元素排序</div>
             </div>
             <div class="nav-card">
+                <span class="emoji">🎯</span>
                 <a href="selection_sort.html">選擇排序法</a>
-                <p>時間複雜度: O(n²)</p>
+                <div class="complexity">⏱️ O(n²)</div>
+                <div class="description">每次選擇最小元素排序</div>
             </div>
             <div class="nav-card">
+                <span class="emoji">📌</span>
                 <a href="insertion_sort.html">插入排序法</a>
-                <p>時間複雜度: O(n²)</p>
+                <div class="complexity">⏱️ O(n²)</div>
+                <div class="description">逐個插入元素到已排序部分</div>
             </div>
             <div class="nav-card">
+                <span class="emoji">⚡</span>
                 <a href="merge_sort.html">合併排序法</a>
-                <p>時間複雜度: O(n log n)</p>
+                <div class="complexity">⏱️ O(n log n)</div>
+                <div class="description">分治策略高效排序</div>
             </div>
+        </div>
+        
+        <div class="footer">
+            <p>💡 提示：點擊每個排序方法卡片進入學習工具，輸入數字即可開始體驗！</p>
         </div>
     </div>
 

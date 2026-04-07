@@ -5,126 +5,252 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>插入排序法學習工具</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 {
-            color: #333;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
-        .array-container {
+        .visualization {
+            background: linear-gradient(to right, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px 20px;
+            border-radius: 12px;
+            margin: 30px 0;
+            min-height: 300px;
             display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
             justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            gap: 8px;
+            height: 200px;
+            margin-bottom: 20px;
         }
-        .array-element {
-            width: 40px;
-            height: 40px;
-            margin: 0 5px;
+        .bar-wrapper {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background-color: #4CAF50;
-            color: white;
+            gap: 5px;
+        }
+        .bar {
+            width: 40px;
+            background: linear-gradient(180deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 2px solid #45a049;
+        }
+        .bar.current {
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+            border-color: #FF6F00;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+            transform: scale(1.05);
+        }
+        .bar.comparing {
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            border-color: #C62828;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
+            animation: shake 0.3s ease-in-out;
+        }
+        .bar.sorted {
+            background: linear-gradient(180deg, #8BC34A 0%, #7CB342 100%);
+            border-color: #689F38;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .bar-label {
             font-weight: bold;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        .array-element.current {
-            background-color: #FF9800;
-        }
-        .array-element.comparing {
-            background-color: #F44336;
-        }
-        .array-element.sorted {
-            background-color: #8BC34A;
+            color: #333;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: center;
         }
         .controls {
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            background-color: #2196F3;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
         }
-        button:hover {
-            background-color: #0b7dda;
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
         }
         button:disabled {
-            background-color: #cccccc;
+            background: linear-gradient(135deg, #ccc 0%, #aaa 100%);
             cursor: not-allowed;
+            opacity: 0.6;
         }
-        .back-link {
-            margin-top: 20px;
+        .input-group {
+            margin: 25px 0;
             text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
         }
-        .back-link a {
-            color: #2196F3;
-            text-decoration: none;
-            font-size: 16px;
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
         }
-        .back-link a:hover {
-            text-decoration: underline;
+        input {
+            padding: 12px;
+            width: 250px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00f2fe;
         }
         .steps {
             margin: 20px 0;
-            padding: 10px;
-            background-color: #e8f5e8;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #dcedc8 100%);
             border-left: 5px solid #4CAF50;
+            border-radius: 6px;
+        }
+        .steps h3 {
+            color: #2d5016;
+            margin-bottom: 12px;
+        }
+        .steps p {
+            margin: 6px 0;
+            color: #333;
+            line-height: 1.6;
         }
         .complexity {
             margin: 20px 0;
-            padding: 10px;
-            background-color: #fff3cd;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
             border-left: 5px solid #ffc107;
+            border-radius: 6px;
         }
-        .input-group {
+        .complexity h3 {
+            color: #7a4a00;
+            margin-bottom: 12px;
+        }
+        .complexity p {
+            margin: 8px 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        #current-step {
             margin: 20px 0;
-            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 5px solid #2196F3;
+            border-radius: 6px;
         }
-        input {
-            padding: 8px;
-            width: 200px;
-            margin-right: 10px;
+        #current-step h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+        #step-info {
+            color: #333;
+            font-size: 1.05em;
+            font-weight: 500;
+        }
+        .back-link {
+            margin-top: 25px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        .back-link a {
+            color: #00f2fe;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .back-link a:hover {
+            color: #4facfe;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>📌 插入排序法</h1>
+        <p>互動式學習工具 - 逐步演示排序過程</p>
+    </div>
     <div class="container">
-        <h1>插入排序法學習工具</h1>
         
         <div class="input-group">
             <label for="array-input">輸入要排序的數字（用逗號分隔）：</label>
-            <input type="text" id="array-input" placeholder="例如: 5,3,8,4,2">
+            <input type="text" id="array-input" placeholder="例如: 5,3,8,4,2" value="5,3,8,4,2">
             <button onclick="initializeArray()">初始化陣列</button>
         </div>
         
-        <div class="array-container" id="array-container"></div>
+        <div class="visualization">
+            <div class="bars-container" id="bars-container"></div>
+        </div>
         
         <div class="controls">
-            <button id="start-btn" onclick="startSort()" disabled>開始排序</button>
-            <button id="step-btn" onclick="stepSort()" disabled>下一步</button>
-            <button id="reset-btn" onclick="reset()">重置</button>
+            <button id="prev-btn" onclick="previousStep()" disabled>⬅ 上一步</button>
+            <button id="start-btn" onclick="startSort()" disabled>▶ 開始排序</button>
+            <button id="step-btn" onclick="nextStep()" disabled>下一步 ➡</button>
+            <button id="reset-btn" onclick="reset()">🔄 重置</button>
         </div>
         
         <div class="steps">
-            <h3>操作過程步驟：</h3>
+            <h3>📚 操作過程步驟：</h3>
             <div id="steps-content">
                 <p>1. 從第二個元素開始，將其視為要插入的元素。</p>
                 <p>2. 比較該元素與已排序區域中的元素。</p>
@@ -135,14 +261,14 @@
         </div>
         
         <div class="complexity">
-            <h3>操作複雜度：</h3>
+            <h3>⏱️ 操作複雜度：</h3>
             <p><strong>時間複雜度：</strong>O(n²) - 平均和最壞情況下為O(n²)，最好情況下為O(n)（已排序）。</p>
             <p><strong>空間複雜度：</strong>O(1) - 只使用固定的額外空間。</p>
-            <p><strong>穩定性：</strong>穩定排序 - 相等元素的相對順序不會改變。</p>
+            <p><strong>穩定性：</strong>✓ 穩定排序 - 相等元素的相對順序不會改變。</p>
         </div>
         
         <div id="current-step">
-            <h3>當前步驟：</h3>
+            <h3>📍 當前步驟：</h3>
             <p id="step-info">請先初始化陣列</p>
         </div>
 
@@ -154,12 +280,11 @@
     <script>
         let array = [];
         let originalArray = [];
-        let i = 1;
-        let j = 0;
+        let history = [];
+        let currentStep = -1;
         let isSorting = false;
-        let stepCount = 0;
-        let phase = 'picking'; // 'picking' or 'inserting'
-        let key = 0;
+        let i = 1;
+        let maxValue = 0;
 
         function initializeArray() {
             const input = document.getElementById('array-input').value;
@@ -172,134 +297,172 @@
             
             array = [...numbers];
             originalArray = [...numbers];
+            maxValue = Math.max(...array);
+            history = [{ array: [...array], current: -1, comparing: [], sorted: [0] }];
+            currentStep = 0;
             i = 1;
-            j = 0;
-            stepCount = 0;
             isSorting = false;
-            phase = 'picking';
-            key = 0;
             
-            renderArray();
+            renderBars();
             updateButtons();
             document.getElementById('step-info').textContent = '陣列已初始化，點擊"開始排序"開始';
         }
 
-        function renderArray() {
-            const container = document.getElementById('array-container');
+        function renderBars() {
+            const container = document.getElementById('bars-container');
             container.innerHTML = '';
             
-            array.forEach((num, index) => {
-                const element = document.createElement('div');
-                element.className = 'array-element';
-                element.textContent = num;
-                element.id = `element-${index}`;
-                container.appendChild(element);
+            const state = history[currentStep] || { array, current: -1, comparing: [], sorted: [] };
+            
+            state.array.forEach((num, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bar-wrapper';
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.id = `bar-${index}`;
+                
+                const height = (num / maxValue) * 150;
+                bar.style.height = height + 'px';
+                
+                if (state.sorted.includes(index)) {
+                    bar.classList.add('sorted');
+                } else if (index === state.current) {
+                    bar.classList.add('current');
+                } else if (state.comparing.includes(index)) {
+                    bar.classList.add('comparing');
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = num;
+                
+                wrapper.appendChild(bar);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
             });
         }
 
         function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
             const startBtn = document.getElementById('start-btn');
             const stepBtn = document.getElementById('step-btn');
             
-            if (array.length > 0 && !isSorting) {
-                startBtn.disabled = false;
-                stepBtn.disabled = false;
-            } else {
-                startBtn.disabled = true;
-                stepBtn.disabled = true;
-            }
+            prevBtn.disabled = currentStep <= 0 || isSorting;
+            startBtn.disabled = array.length === 0 || isSorting;
+            stepBtn.disabled = array.length === 0 || isSorting || isArraySorted();
         }
 
-        function highlightElements() {
-            // 清除之前的highlight
-            document.querySelectorAll('.array-element').forEach(el => {
-                el.classList.remove('current', 'comparing', 'sorted');
-            });
-            
-            // 已排序的元素
-            for (let k = 0; k < i; k++) {
-                document.getElementById(`element-${k}`).classList.add('sorted');
+        function isArraySorted() {
+            for (let k = 0; k < array.length - 1; k++) {
+                if (array[k] > array[k + 1]) return false;
             }
-            
-            // 當前要插入的元素
-            if (phase === 'picking' && i < array.length) {
-                document.getElementById(`element-${i}`).classList.add('current');
-            }
-            
-            // 比較的元素
-            if (phase === 'inserting' && j >= 0) {
-                document.getElementById(`element-${j}`).classList.add('comparing');
-            }
+            return true;
         }
 
-        function stepSort() {
-            if (array.length === 0) return;
-            
-            if (i >= array.length) {
-                // 排序完成
-                document.getElementById('step-info').textContent = `排序完成！總共 ${stepCount} 步`;
-                isSorting = false;
-                updateButtons();
-                highlightElements();
-                return;
-            }
-            
-            if (phase === 'picking') {
-                key = array[i];
-                j = i - 1;
-                highlightElements();
-                document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 選擇元素 ${key} 在位置 ${i}，準備插入到已排序區域 [0, ${i - 1}]`;
-                phase = 'inserting';
-                setTimeout(stepSort, 1000);
-                return;
-            } else if (phase === 'inserting') {
-                if (j >= 0 && array[j] > key) {
-                    // 向右移動
-                    array[j + 1] = array[j];
-                    highlightElements();
-                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: ${array[j]} > ${key}，將 ${array[j]} 向右移動到位置 ${j + 1}`;
-                    j--;
-                    setTimeout(() => {
-                        renderArray();
-                        setTimeout(stepSort, 500);
-                    }, 500);
-                } else {
-                    // 插入
-                    array[j + 1] = key;
-                    renderArray();
-                    document.getElementById('step-info').textContent = `步驟 ${++stepCount}: 將元素 ${key} 插入到位置 ${j + 1}`;
-                    i++;
-                    phase = 'picking';
-                    setTimeout(stepSort, 1000);
+        function nextStep() {
+            if (currentStep >= history.length - 1) {
+                if (i >= array.length) {
+                    document.getElementById('step-info').textContent = '🎉 排序完成！';
+                    updateButtons();
+                    renderBars();
+                    return;
                 }
+                
+                const key = array[i];
+                let j = i - 1;
+                
+                // 準備插入狀態
+                history.push({
+                    array: [...array],
+                    current: i,
+                    comparing: [],
+                    sorted: Array.from({length: i}, (_, idx) => idx)
+                });
+                
+                // 執行插入
+                while (j >= 0 && array[j] > key) {
+                    array[j + 1] = array[j];
+                    j--;
+                }
+                array[j + 1] = key;
+                
+                history.push({
+                    array: [...array],
+                    current: -1,
+                    comparing: [],
+                    sorted: Array.from({length: i + 1}, (_, idx) => idx)
+                });
+                
+                i++;
             }
+            
+            currentStep++;
+            if (currentStep < history.length) {
+                array = [...history[currentStep].array];
+            }
+            
+            updateStepInfo();
+            renderBars();
+            updateButtons();
+        }
+
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                array = [...history[currentStep].array];
+                updateStepInfo();
+                renderBars();
+                updateButtons();
+            }
+        }
+
+        function updateStepInfo() {
+            const state = history[currentStep];
+            let info = `步驟 ${currentStep}: `;
+            
+            if (state.current >= 0) {
+                info += `選擇元素 ${array[state.current]} 準備插入到已排序區域 [0, ${state.current - 1}]`;
+            } else if (state.sorted.length > 1) {
+                info += `已排序 ${state.sorted.length} 個元素`;
+            } else {
+                info = '開始排序...';
+            }
+            
+            document.getElementById('step-info').textContent = info;
         }
 
         function startSort() {
             if (isSorting) return;
             isSorting = true;
-            stepCount = 0;
-            i = 1;
-            j = 0;
-            phase = 'picking';
-            document.getElementById('step-info').textContent = '開始排序...';
-            stepSort();
+            document.getElementById('step-info').textContent = '正在自動排序...';
+            
+            function autoStep() {
+                if (currentStep >= history.length - 1 && isArraySorted()) {
+                    document.getElementById('step-info').textContent = '🎉 排序完成！';
+                    isSorting = false;
+                    updateButtons();
+                    return;
+                }
+                
+                nextStep();
+                setTimeout(autoStep, 600);
+            }
+            
+            setTimeout(autoStep, 600);
         }
 
         function reset() {
             array = [...originalArray];
+            history = [{ array: [...array], current: -1, comparing: [], sorted: [0] }];
+            currentStep = 0;
             i = 1;
-            j = 0;
-            stepCount = 0;
             isSorting = false;
-            phase = 'picking';
-            key = 0;
-            renderArray();
+            renderBars();
             updateButtons();
-            document.getElementById('step-info').textContent = '已重置，請重新初始化或開始排序';
+            document.getElementById('step-info').textContent = '已重置，點擊"開始排序"重新開始';
         }
 
-        // 初始化時更新按鈕狀態
         updateButtons();
     </script>
 </body>
