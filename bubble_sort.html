@@ -299,7 +299,7 @@
             array = [...numbers];
             originalArray = [...numbers];
             maxValue = Math.max(...array);
-            history = [{ array: [...array], comparing: -1, swapping: -1, sorted: [] }];
+            history = [{ array: [...array], comparing: [], swapping: -1, sorted: [] }];
             currentStep = 0;
             i = 0;
             j = 0;
@@ -482,7 +482,7 @@
 
         function reset() {
             array = [...originalArray];
-            history = [{ array: [...array], comparing: -1, swapping: -1, sorted: [] }];
+            history = [{ array: [...array], comparing: [], swapping: -1, sorted: [] }];
             currentStep = 0;
             i = 0;
             j = 0;
