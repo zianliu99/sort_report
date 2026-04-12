@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排序算法心得報告</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #273c75 0%, #40739e 100%);
+            color: #2b2b2b;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, #40739e 0%, #192a56 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+        }
+        .hero p {
+            font-size: 1.05rem;
+            opacity: 0.92;
+            max-width: 760px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .content {
+            padding: 40px 35px;
+        }
+        section {
+            margin-bottom: 40px;
+        }
+        h2 {
+            font-size: 1.9rem;
+            margin-bottom: 18px;
+            color: #192a56;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #3867d6;
+        }
+        p {
+            line-height: 1.75;
+            margin-bottom: 16px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style: disc;
+            margin-bottom: 16px;
+        }
+        li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 14px 16px;
+            border: 1px solid #e1e1e1;
+            text-align: left;
+        }
+        th {
+            background: #f7f9fc;
+            color: #1e272e;
+        }
+        .chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            padding: 20px 10px;
+            background: #f8f9fa;
+            border-radius: 14px;
+            min-height: 260px;
+            margin-top: 20px;
+        }
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-group span {
+            font-size: 0.88rem;
+            color: #2d3436;
+            text-align: center;
+        }
+        .bar {
+            width: 100%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #74b9ff 0%, #0984e3 100%);
+            transition: height 0.35s ease;
+        }
+        .bar-label {
+            text-align: center;
+            font-size: 0.82rem;
+            color: #636e72;
+            max-width: 90px;
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 168, 255, 0.24);
+        }
+        .note {
+            background: #f1f2f6;
+            border-left: 4px solid #00a8ff;
+            padding: 18px 20px;
+            border-radius: 10px;
+            line-height: 1.75;
+            color: #2f3640;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #00a8ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="hero">
+            <h1>排序算法心得報告</h1>
+            <p>本頁面整理五種排序法的基本原理、複雜度分析，並透過程式模擬比較不同演算法在不同資料規模下的效能差異。</p>
+        </div>
+        <div class="content">
+            <section>
+                <h2>1. 五個排序法介紹</h2>
+                <p>以下介紹五種排序法的基本原理與操作方式：</p>
+                <ul>
+                    <li><strong>氣泡排序（Bubble Sort）</strong>：反覆比較相鄰兩個元素，如果順序錯誤就交換。每次遍歷後，最大的元素會移動到序列尾端。</li>
+                    <li><strong>選擇排序（Selection Sort）</strong>：每輪選出剩餘元素中的最小值，將其放到已排序區域的末端。適合概念理解，但交換次數較少。</li>
+                    <li><strong>插入排序（Insertion Sort）</strong>：逐一將元素插入到前面已排序區域的正確位置。對於近乎已排序的資料特別有效。</li>
+                    <li><strong>合併排序（Merge Sort）</strong>：使用分治策略，先遞迴拆分陣列為較小區段，再合併已排序的子陣列，產生完整排序結果。</li>
+                    <li><strong>快速排序（Quick Sort）</strong>：選擇一個樞紐元素（pivot），將資料分成小於與大於樞紐的兩個子陣列，遞迴排序後拼接結果。</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>2. 複雜度分析</h2>
+                <p>比較這五種排序法的時間與空間複雜度：</p>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>排序法</th>
+                                <th>時間複雜度</th>
+                                <th>空間複雜度</th>
+                                <th>穩定性</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>氣泡排序</td>
+                                <td>最佳 O(n)、平均 O(n²)、最差 O(n²)</td>
+                                <td>O(1)</td>
+                                <td>穩定</td>
+                            </tr>
+                            <tr>
+                                <td>選擇排序</td>
+                                <td>最佳 O(n²)、平均 O(n²)、最差 O(n²)</td>
+                                <td>O(1)</td>
+                                <td>不穩定</td>
+                            </tr>
+                            <tr>
+                                <td>插入排序</td>
+                                <td>最佳 O(n)、平均 O(n²)、最差 O(n²)</td>
+                                <td>O(1)</td>
+                                <td>穩定</td>
+                            </tr>
+                            <tr>
+                                <td>合併排序</td>
+                                <td>最佳 O(n log n)、平均 O(n log n)、最差 O(n log n)</td>
+                                <td>O(n)</td>
+                                <td>穩定</td>
+                            </tr>
+                            <tr>
+                                <td>快速排序</td>
+                                <td>最佳 O(n log n)、平均 O(n log n)、最差 O(n²)</td>
+                                <td>O(log n)（遞迴堆疊）</td>
+                                <td>不穩定</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>綜合分析可知，當資料量較小或接近已排序時，氣泡排序和插入排序表現還算合理；而對大資料量，合併排序與快速排序通常更高效。</p>
+            </section>
+
+            <section>
+                <h2>3. 數據模擬</h2>
+                <p>這裡使用 JavaScript 程式實作五種排序法，並測量不同資料量下執行所需時間。</p>
+                <div class="note">
+                    <strong>說明：</strong>程式採用隨機陣列測試，並測量每種排序算法的執行時間，模擬不同 n 值下的效能差異。
+                </div>
+                <div class="button-row">
+                    <button onclick="runSimulation()">執行效能模擬</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="result-table">
+                        <thead>
+                            <tr>
+                                <th>資料量 n</th>
+                                <th>氣泡排序 (ms)</th>
+                                <th>選擇排序 (ms)</th>
+                                <th>插入排序 (ms)</th>
+                                <th>合併排序 (ms)</th>
+                                <th>快速排序 (ms)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="6" style="text-align:center; color:#888;">請按「執行效能模擬」開始測試</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section>
+                <h2>4. 結果呈現與比較</h2>
+                <p>以下圖表以模擬結果展示不同排序法在各資料量下的執行時間差異。</p>
+                <div class="chart" id="result-chart"></div>
+                <p>可以看出：當 n 增加時，O(n²) 類排序法時間成長較快，而 O(n log n) 類排序法則更穩定。</p>
+            </section>
+
+            <section>
+                <h2>5. 心得與結論</h2>
+                <p>在這次期中報告中，我學習到了如何較高效率的跟copilot溝通來輔助我製作程式，以及各種排序法的邏輯原理，操作步驟跟操作複雜度等。也學習到了如何利用github建立專案，這是我自己第一次做出網頁，希望我以後能夠增加自己完成這些操作的熟練度，做出更好的作品。</p>
+                <p>從理論與實驗結果可以得出結論：雖然簡單排序法對教育和理解很有幫助，但實際應用時大多數情況下更適合採用合併排序或快速排序以取得較佳效能。未來我會繼續練習演算法實作與效能分析，強化自己的程式設計能力。</p>
+            </section>
+
+            <a class="back-link" href="index.html">← 返回主頁</a>
+        </div>
+    </div>
+
+    <script>
+        function createRandomArray(n) {
+            return Array.from({ length: n }, () => Math.floor(Math.random() * 10000));
+        }
+
+        function bubbleSort(arr) {
+            const a = [...arr];
+            const n = a.length;
+            for (let i = 0; i < n - 1; i++) {
+                for (let j = 0; j < n - 1 - i; j++) {
+                    if (a[j] > a[j + 1]) {
+                        [a[j], a[j + 1]] = [a[j + 1], a[j]];
+                    }
+                }
+            }
+            return a;
+        }
+
+        function selectionSort(arr) {
+            const a = [...arr];
+            const n = a.length;
+            for (let i = 0; i < n - 1; i++) {
+                let min = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (a[j] < a[min]) min = j;
+                }
+                [a[i], a[min]] = [a[min], a[i]];
+            }
+            return a;
+        }
+
+        function insertionSort(arr) {
+            const a = [...arr];
+            for (let i = 1; i < a.length; i++) {
+                const current = a[i];
+                let j = i - 1;
+                while (j >= 0 && a[j] > current) {
+                    a[j + 1] = a[j];
+                    j--;
+                }
+                a[j + 1] = current;
+            }
+            return a;
+        }
+
+        function mergeSort(arr) {
+            if (arr.length <= 1) return arr;
+            const mid = Math.floor(arr.length / 2);
+            const left = mergeSort(arr.slice(0, mid));
+            const right = mergeSort(arr.slice(mid));
+            const merged = [];
+            let i = 0, j = 0;
+            while (i < left.length && j < right.length) {
+                if (left[i] < right[j]) merged.push(left[i++]);
+                else merged.push(right[j++]);
+            }
+            return merged.concat(left.slice(i)).concat(right.slice(j));
+        }
+
+        function quickSort(arr) {
+            if (arr.length <= 1) return arr;
+            const pivot = arr[arr.length - 1];
+            const left = [];
+            const right = [];
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] < pivot) left.push(arr[i]);
+                else right.push(arr[i]);
+            }
+            return quickSort(left).concat(pivot, quickSort(right));
+        }
+
+        function measureTime(sortFn, arr) {
+            const copy = [...arr];
+            const start = performance.now();
+            sortFn(copy);
+            return performance.now() - start;
+        }
+
+        function runSimulation() {
+            const sizes = [100, 300, 600, 1200];
+            const tableBody = document.querySelector('#result-table tbody');
+            tableBody.innerHTML = '';
+            const results = [];
+
+            sizes.forEach((n) => {
+                const data = createRandomArray(n);
+                const bubble = measureTime(bubbleSort, data);
+                const selection = measureTime(selectionSort, data);
+                const insertion = measureTime(insertionSort, data);
+                const merge = measureTime(mergeSort, data);
+                const quick = measureTime(quickSort, data);
+
+                results.push({ n, bubble, selection, insertion, merge, quick });
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${n}</td>
+                    <td>${bubble.toFixed(2)}</td>
+                    <td>${selection.toFixed(2)}</td>
+                    <td>${insertion.toFixed(2)}</td>
+                    <td>${merge.toFixed(2)}</td>
+                    <td>${quick.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            drawChart(results);
+        }
+
+        function drawChart(results) {
+            const chart = document.getElementById('result-chart');
+            chart.innerHTML = '';
+            const maxTime = Math.max(...results.flatMap(r => [r.bubble, r.selection, r.insertion, r.merge, r.quick]));
+
+            const labels = ['Bubble', 'Selection', 'Insertion', 'Merge', 'Quick'];
+            labels.forEach((label, index) => {
+                const group = document.createElement('div');
+                group.className = 'bar-group';
+                const title = document.createElement('span');
+                title.textContent = label;
+                group.appendChild(title);
+
+                const value = results.reduce((sum, item) => {
+                    const key = ['bubble', 'selection', 'insertion', 'merge', 'quick'][index];
+                    return sum + item[key];
+                }, 0) / results.length;
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${Math.max(20, (value / maxTime) * 220)}px`;
+                group.appendChild(bar);
+
+                const labelText = document.createElement('div');
+                labelText.className = 'bar-label';
+                labelText.textContent = `${value.toFixed(2)} ms (平均)`;
+                group.appendChild(labelText);
+                chart.appendChild(group);
+            });
+        }
+    </script>
+</body>
+</html>
